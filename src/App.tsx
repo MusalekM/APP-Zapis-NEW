@@ -10,6 +10,10 @@ import { useMemo, useState } from "react";
    - Náhled a základní validace
    ======================================================================== */
 
+/** === Your Apps Script Web App URL (from Deploy → Web app → /exec) === */
+const WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbztZ3eItDE9a6ynCbeqn9dYNrzDW9D-j4UB6v_7xQ2cuK_SY369m0tYruPzLVQqYu3o/exec";
+
 /* ===================== ZÁKLADNÍ DATOVÉ TYPY A POMOCNÉ LABELY ===================== */
 
 type SchoolId = "LA" | "HE" | "MO" | "LO" | "ZE" | "RU" | "LY" | "PL" | "VEP";
@@ -328,8 +332,7 @@ export default function App() {
   const [classId,    setClassId]      = useState("");
   const [place,      setPlace]        = useState<"tělocvična"|"hřiště"|"venku"|"jiné"|"">("");
   const [placeOther, setPlaceOther]   = useState("");
-  
-  
+
   /* --- Úvodní část --- */
   const [warmup, setWarmup] = useState("");
 
@@ -388,13 +391,13 @@ export default function App() {
     if (discipline === "other") return [];
     switch (area) {
       case "sportovni_hry":
-        return GAME_CONTENT[discipline as Game] ?? [];
+        return GAME_CONTENT[discipline as any] ?? [];
       case "atletika":
-        return ATHLETICS_CONTENT[discipline as Athletics] ?? [];
+        return ATHLETICS_CONTENT[discipline as any] ?? [];
       case "gymnastika":
-        return GYM_CONTENT[discipline as Gym] ?? [];
+        return GYM_CONTENT[discipline as any] ?? [];
       case "upoly":
-        return UPOLY_CONTENT[discipline as Upoly] ?? [];
+        return UPOLY_CONTENT[discipline as any] ?? [];
       default:
         return [];
     }
@@ -448,10 +451,10 @@ export default function App() {
     if (!a || !d) return "";
     if (d === "other") return dOther || "(jiná disciplína – prázdná)";
     switch (a) {
-      case "sportovni_hry": return GAME_LABEL[d as Game] ?? d;
-      case "atletika":      return ATHLETICS_LABEL[d as Athletics] ?? d;
-      case "gymnastika":    return GYM_LABEL[d as Gym] ?? d;
-      case "upoly":         return UPOLY_LABEL[d as Upoly] ?? d;
+      case "sportovni_hry": return GAME_LABEL[d as any] ?? d;
+      case "atletika":      return ATHLETICS_LABEL[d as any] ?? d;
+      case "gymnastika":    return GYM_LABEL[d as any] ?? d;
+      case "upoly":         return UPOLY_LABEL[d as any] ?? d;
       default: return d;
     }
   };
@@ -460,10 +463,10 @@ export default function App() {
     if (!a || !d || !f) return "";
     if (f === "other") return fOther || "(jiná činnost – prázdná)";
     const list =
-      a === "sportovni_hry" ? GAME_CONTENT[d as Game] :
-      a === "atletika"      ? ATHLETICS_CONTENT[d as Athletics] :
-      a === "gymnastika"    ? GYM_CONTENT[d as Gym] :
-      a === "upoly"         ? UPOLY_CONTENT[d as Upoly] : [];
+      a === "sportovni_hry" ? GAME_CONTENT[d as any] :
+      a === "atletika"      ? ATHLETICS_CONTENT[d as any] :
+      a === "gymnastika"    ? GYM_CONTENT[d as any] :
+      a === "upoly"         ? UPOLY_CONTENT[d as any] : [];
     return list.find(x => x.value === f)?.label ?? f;
   };
 
@@ -679,9 +682,8 @@ export default function App() {
             {/* 2) CO SE DĚLO (ZAMĚŘENÍ) */}
             {(area && ((area === "other" && discOther.trim()) || (area !== "other" && discipline))) && (
               <>
-                <label className="block text-sm font-medium mt-4 mb-1">Co se dělo (zaměření)</label>
+                <label className="block text_sm font-medium mt-4 mb-1">Co se dělo (zaměření)</label>
 
-                {/* Pro „jinou oblast“ i „jinou disciplínu“ rovnou umožníme text; jinak nabídka + „jiná“ */}
                 {(area === "other" || discipline === "other") ? (
                   <input
                     className="w-full border rounded p-2"
@@ -783,7 +785,7 @@ export default function App() {
             <p><span className="font-medium">Zaměření:</span> {focusPretty(area, discipline, focus, focusOther) || "—"}</p>
             <p><span className="font-medium">Charakter:</span> {character ? CHARACTER_LABEL[character] : "—"}</p>
             <p><span className="font-medium">Vedl:</span> {leader || (isLeaderLockedToTeacher ? "ucitel" : "—")}</p>
-                  </div>
+          </div>
           <button
             className="mt-4 w-full md:w-auto px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-300"
             disabled={!canSubmit}
@@ -791,7 +793,7 @@ export default function App() {
               console.log("Kliknuto – odesílám data…");
               const payload = {
                 schoolType,
-               schoolId,
+                schoolId,
                 teacher,
                 classId,
                 place,
@@ -807,21 +809,15 @@ export default function App() {
               };
 
               try {
-                const formData = new FormData();
-                formData.append("data", JSON.stringify(payload));
-
                 const response = await fetch(
-                "https://script.google.com/macros/s/AKfycbznB3WyOCusMqdtpYrWsvE3yXZZOEDd7O08nBEFaXCdK5wJXbG01F9D1KwQsTJ8CoyTbQ/exec",
-                {
-                  method: "POST",
-                  mode: "no-cors",
-                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                  body: "data=" + encodeURIComponent(JSON.stringify(payload)),
-                }
-              );
-
-
-
+                  WEB_APP_URL,
+                  {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: "data=" + encodeURIComponent(JSON.stringify(payload)),
+                  }
+                );
 
                 console.log("Fetch dokončen", response);
                 alert("✅ Záznam byl odeslán do Google Sheets!");
@@ -838,7 +834,3 @@ export default function App() {
     </div>
   );
 }
-
-
-
-
