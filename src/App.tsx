@@ -811,7 +811,7 @@ export default function App() {
                 formData.append("data", JSON.stringify(payload));
 
                 const response = await fetch(
-                "https://script.google.com/macros/s/AKfycbxzXioK_pC5D2bhnJVFvGhey-CpX4GXI98AkzwkJ-5V_sLmkdlPIqoI2gSW-TyykkKC/exec",
+                "https://script.google.com/macros/s/AKfycbz732CljOPqYSxUK5eHk2d28QC9L5ocqb_-9Uv8VXuG9gniapzMmPrHVG2glQw_gKe_vA/exec",
                 {
                   method: "POST",
                   mode: "no-cors",
